@@ -88,3 +88,19 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+
+const os = require('os');
+const Socket = require('socket.io');
+// Socketの中は { ..., Server: {...}, ... } のようなオブジェクトになっている
+const Server = Socket.Server;
+
+const io = new Server(server);
+
+function emitServerStatus(socket) {
+  socket.emit('server-status', { loadavg: os.loadavg() });
+  console.log('server-status event emitted.');
+}
+
+io.on('connection', function (socket) {
+  setInterval(emitServerStatus, 10, socket);
+});
